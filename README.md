@@ -29,40 +29,40 @@ REQUIRED productId,\
 REQUIRED banner(header, text),\
 REQUIRED features(banner, description),\
 REQUIRED featureSetup(header, description),\
-REQUIRED additionalFeatures(header, description, contentGrid[title, descrption])\
+REQUIRED additionalFeatures(header, description, contentGrid[title, descrption])
 
 For Read: "/product-features/:id" GET\
-REQUIRED productId\
+REQUIRED productId
 
 for Update: "/product-features/update/:id" PUT\
 REQUIRED productId,\
 OPTIONAL banner(header, text),\
 OPTIONAL features(banner, description),\
 OPTIONAL featureSetup(header, description),\
-OPTIONAL additionalFeatures(header, description, contentGrid[title, descrption])\
+OPTIONAL additionalFeatures(header, description, contentGrid[title, descrption])
 
 for Delete: "/product-features/delete/:id" DELETE\
-REQUIRED productId\
+REQUIRED productId
 
 ## Data structure
 
-schema = {
+schema = {\
   productId: {
     type: Number,
     unique: true
-  },
+  },\
   banner: {
     header: String,
     text: [{type: String}]
-  },
+  },\
   features: [{
     header: String,
     description: String
-  }],
+  }],\
   featureSetup: {
     header: String,
     description: [{type: String}]
-  },
+  },\
   additionalFeatures: {
     header: String,
     description: String,
