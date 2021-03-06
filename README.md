@@ -24,25 +24,25 @@ npm install
 
 ## CRUD Api Calls
 
-For Create: "/product-features/create/" POST
-REQUIRED productId,
-REQUIRED banner(header, text),
-REQUIRED features(banner, description),
-REQUIRED featureSetup(header, description),
-REQUIRED additionalFeatures(header, description, contentGrid[title, descrption])
+For Create: "/product-features/create/" POST\
+REQUIRED productId,\
+REQUIRED banner(header, text),\
+REQUIRED features(banner, description),\
+REQUIRED featureSetup(header, description),\
+REQUIRED additionalFeatures(header, description, contentGrid[title, descrption])\
 
-For Read: "/product-features/:id" GET
-REQUIRED productId
+For Read: "/product-features/:id" GET\
+REQUIRED productId\
 
-for Update: "/product-features/update/:id" PUT
-REQUIRED productId,
-OPTIONAL banner(header, text),
-OPTIONAL features(banner, description),
-OPTIONAL featureSetup(header, description),
-OPTIONAL additionalFeatures(header, description, contentGrid[title, descrption])
+for Update: "/product-features/update/:id" PUT\
+REQUIRED productId,\
+OPTIONAL banner(header, text),\
+OPTIONAL features(banner, description),\
+OPTIONAL featureSetup(header, description),\
+OPTIONAL additionalFeatures(header, description, contentGrid[title, descrption])\
 
-for Delete: "/product-features/delete/:id" DELETE
-REQUIRED productId
+for Delete: "/product-features/delete/:id" DELETE\
+REQUIRED productId\
 
 ## Data structure
 
