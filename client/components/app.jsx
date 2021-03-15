@@ -53,22 +53,22 @@ class ProductFeatures extends Component {
   }
 
   getProductFeatures(productId) {
-    return axios.get(`http://ec2-3-21-59-121.us-east-2.compute.amazonaws.com:4000/product-features/${productId}`)
+    return axios.get(`http://localhost:4000/product-features/${productId}`)
   }
 
   getProductPhotos(productId) {
-    return axios.get(`http://ec2-3-136-203-39.us-east-2.compute.amazonaws.com:4002/photos/features/${productId}`)
+    return axios.get(`http://localhost:4002/photos/features/${productId}`)
   }
 
   fetchData(productId) {
     Promise.all([
       this.getProductFeatures(productId),
-      this.getProductPhotos(productId)
+      //this.getProductPhotos(productId)
     ])
     .then((res) => {
       this.setState({
         productFeatures: res[0].data,
-        productPhotos: res[1].data.featuresUrls
+        productPhotos: [] //res[1].data.featuresUrls
       })
     })
     .catch((err) => {

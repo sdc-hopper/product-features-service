@@ -1,19 +1,32 @@
 const nano = require('nano')('http://admin:password@localhost:5984');
 const { fakeDataGenerator } = require('./fakeDataGenerator.js');
 
-nano.db.destroy('testing').then(() => {
-  nano.db.create('testing').then(() => {
-    const db = nano.db.use('testing');
-    (async () => {
-      for (let id = 0; id < 10000; id += 1000) {
-        await add(id, db);
-      }
-    })();
-  });
-});
+let seed = async (totalRecordCount) => {
+  const db = nano.db.use('testing');
+  batchCount = Math.floor(totalRecordCount / 5 + 1)
+  for (let chunk = 0; chunk < 5; chunk++) {
 
-let add = async (id, db) => {
-  let fakeData = await fakeDataGenerator(1000, 1000 + id);
-  await db.bulk({docs: fakeData});
-  console.log('Done with: ', id)
+    (async () => {
+      for (let batch = 0; batch < batchCount; batch++) {
+        let idIncrement = batch * chunk * 100;
+        let data = await fakeDataGenerator(100, 1000 + idIncrement);
+        await db.bulk({ docs: data })
+      }
+      console.log('finished with chunk: ', chunk)
+    })();
+  }
+};
+
+let seeder = async () => {
+  let dbName = 'testing';
+  let dblist = await nano.db.list();
+
+  if (dblist.includes(dbName)) {
+    await nano.db.destroy(dbName);
+  }
+  await nano.db.create(dbName);
+
+  seed(10000);
 }
+
+seeder();
