@@ -66,7 +66,7 @@ const AdditionalFeatures = (props) => {
           return (
             <Item key={i}>
               <Icon src={row1images[i]}></Icon>
-              <H4>{item.title}</H4>
+              <H4>{item.header}</H4>
               <p style={pStyle}>{item.description}</p>
             </Item>
           )
