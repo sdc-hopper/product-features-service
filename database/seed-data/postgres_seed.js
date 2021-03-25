@@ -132,7 +132,6 @@ let seeder = async (records) => {
 
   for (record of records) {
     try {
-      console.log('On record: ', record[0], ' length: ', record.length)
       await insert(record);
       if (recordid % 100 === 0) { console.log('Finished record: ', recordid) }
     }
@@ -164,10 +163,7 @@ let testseed = async () => {
   let data = await slowreader(path);
   console.log('Got ', data.length, ' records.')
 
-  for (let i = 0; i < 100; i++) {
-    console.log("for item ", data[i][0], " got ", data[i].length)
-  }
-  //seeder(data);
+  seeder(data);
 }
 
 testseed();

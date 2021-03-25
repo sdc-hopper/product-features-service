@@ -27,10 +27,8 @@ let reader = async (file) => {
 let csvreader = async (filepath) => await reader(filepath);
 
 let slowreader = async (filepath) => {
-  let data = [];
-  fs.readFile(filepath, (err, records) => { console.log(records.length); data = records });
-  console.log(data.length)
-  data = data.map(item => disassembler(item));
+  let data = fs.readFileSync(filepath, 'utf8');
+  data = disassembler(data)
   return data;
 }
 
