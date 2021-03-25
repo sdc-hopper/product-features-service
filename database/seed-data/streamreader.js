@@ -1,7 +1,4 @@
 const fs = require('fs');
-const util = require('util');
-
-let datapath = 'database/seed-data/csvData/data.csv';
 
 let disassembler = files => {
   let result = [];
@@ -19,14 +16,25 @@ let disassembler = files => {
 
 let reader = async (file) => {
   return new Promise((resolve, reject) => {
+    let records = [];
     const stream = fs.createReadStream(file, {encoding: 'utf8'});
     stream.on('error', reject);
-    stream.on('data', data => resolve(disassembler(data)));
+    stream.on('data', data => records = records.concat(disassembler(data)));
+    stream.on('close', () => resolve(records));
   });
 }
 
 let csvreader = async (filepath) => await reader(filepath);
 
+let slowreader = async (filepath) => {
+  let data = [];
+  fs.readFile(filepath, (err, records) => { console.log(records.length); data = records });
+  console.log(data.length)
+  data = data.map(item => disassembler(item));
+  return data;
+}
+
 module.exports.csvreader = csvreader;
+module.exports.slowreader = slowreader;
 
 // (async () => console.log(await readData(datapath)))();

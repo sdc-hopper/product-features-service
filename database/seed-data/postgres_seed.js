@@ -1,13 +1,13 @@
 const { Pool } = require('pg');
 // const { fakeDataGenerator } = require('./fakeDataGenerator.js');
 const { generator } = require('./csvGenerator');
-const { csvreader } = require('./streamreader')
+const { csvreader, slowreader } = require('./streamreader')
 
 let recordid = 10000000;
 let featureid = 0;
 
 const client = new Pool({
-  user: 'benjaminboyle',
+  user: 'postgres',
   host: 'localhost',
   database: 'postgres',
   password: 'password',
@@ -57,6 +57,7 @@ const initializer = async () => {
 }
 
 const insertFeature = async (productid, header, description, type) => {
+  featureid++;
   await client.query(`
     INSERT INTO featurecontent (featureid, header, description, type)
     VALUES (${featureid}, '${header}', '${description}', '${type}');
@@ -65,40 +66,64 @@ const insertFeature = async (productid, header, description, type) => {
     `).catch(err => console.log(err));
 }
 
-const insert = async (item) => {
+const insertRecordObject = async (item) => {
   let productid = item.productId;
   let banner = item.banner;
   let features = item.features;
   let featureSetup = item.featureSetup
   let additionals = item.additionalFeatures;
+  await client.query(`
+  INSERT INTO records (recordid, productid)
+  VALUES (${recordid}, ${productid});
+  `);
+  for (text of banner.text) {
+    insertFeature(productid, banner.header, text, 'banner');
+  }
+  for (feature of features) {
+    insertFeature(productid, feature.header, feature.description, 'feature');
+  }
+  for (desc of featureSetup.description) {
+    insertFeature(productid, featureSetup.header, desc, 'setup');
+  }
+  insertFeature(productid, additionals.header, additionals.description, 'additional');
+  for (feature of additionals.contentGrid) {
+    insertFeature(productid, feature.title, feature.description, 'additionalfeature');
+  }
+}
+
+let insert = async (data) => {
+  let productid = parseInt(data[0]);
 
   await client.query(`
   INSERT INTO records (recordid, productid)
   VALUES (${recordid}, ${productid});
   `);
 
-  for (text of banner.text) {
-    featureid++;
-    insertFeature(productid, banner.header, text, 'banner');
-  }
+  // banner
+  insertFeature(productid, data[1], data[2], 'banner');
+  insertFeature(productid, data[1], data[3], 'banner');
+  // features
+  insertFeature(productid, data[4], data[5], 'feature');
+  insertFeature(productid, data[6], data[7], 'feature');
+  insertFeature(productid, data[8], data[9], 'feature');
+  insertFeature(productid, data[10], data[11], 'feature');
+  insertFeature(productid, data[12], data[13], 'feature');
+  insertFeature(productid, data[14], data[15], 'feature');
+  insertFeature(productid, data[16], data[17], 'feature');
+  // setup
+  insertFeature(productid, data[18], data[19], 'setup');
+  insertFeature(productid, data[18], data[20], 'setup');
+  insertFeature(productid, data[18], data[21], 'setup');
+  // additonal
+  insertFeature(productid, data[22], data[23], 'additional');
+  // additonalfeatures
+  insertFeature(productid, data[24], data[25], 'addfeature');
+  insertFeature(productid, data[26], data[27], 'addfeature');
+  insertFeature(productid, data[28], data[29], 'addfeature');
+  insertFeature(productid, data[30], data[31], 'addfeature');
+  insertFeature(productid, data[32], data[33], 'addfeature');
 
-  for (feature of features) {
-    featureid++;
-    insertFeature(productid, feature.header, feature.description, 'feature');
-  }
-
-  for (desc of featureSetup.description) {
-    featureid++;
-    insertFeature(productid, featureSetup.header, desc, 'setup');
-  }
-
-  featureid++;
-  insertFeature(productid, additionals.header, additionals.description, 'additional');
-  for (feature of additionals.contentGrid) {
-    featureid++;
-    insertFeature(productid, feature.title, feature.description, 'additionalfeature');
-  }
-
+  recordid++;
 }
 
 let seeder = async (records) => {
@@ -107,17 +132,18 @@ let seeder = async (records) => {
 
   for (record of records) {
     try {
-      await insert(record, recordid++)
+      console.log('On record: ', record[0], ' length: ', record.length)
+      await insert(record);
       if (recordid % 100 === 0) { console.log('Finished record: ', recordid) }
     }
     catch(err) { console.log(err) }
   }
   client.query(`SELECT * FROM records;`)
-  .then(records => console.log('Got : ', records.rows.length))
+  .then(records => console.log('Got records: ', records.rows.length))
   .catch(err => console.log(err))
 
   getter(1005)
-  .then(record => console.log('Got : ', record.rows))
+  .then(record => console.log('Got item: ', record.rows.length))
   .catch(err => console.log(err))
   .finally(() => client.end());
 }
@@ -132,12 +158,19 @@ let getter = async (productid) => {
   return result;
 }
 
-(async () => {
-  await generator(10);
-  let records = await csvreader('database/seed-data/csvData/data.csv');
-  console.log(records)
-  seeder(records);
-})();
+let testseed = async () => {
+  let path = 'database/seed-data/csvData/data.csv';
+  // let data = await csvreader(path);
+  let data = await slowreader(path);
+  console.log('Got ', data.length, ' records.')
+
+  for (let i = 0; i < 100; i++) {
+    console.log("for item ", data[i][0], " got ", data[i].length)
+  }
+  //seeder(data);
+}
+
+testseed();
 
 module.exports.seeder = seeder;
 module.exports.getter = getter;
