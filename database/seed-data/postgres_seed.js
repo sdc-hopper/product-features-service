@@ -1,10 +1,10 @@
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const { fakeDataGenerator } = require('./fakeDataGenerator.js');
 
 let recordid = 10000000;
 let featureid = 0;
 
-const client = new Client({
+const client = new Pool({
   user: 'benjaminboyle',
   host: 'localhost',
   database: 'postgres',
@@ -13,7 +13,7 @@ const client = new Client({
 });
 
 client.connect()
-.then(log => console.log('successfully connected: ', log))
+.then(log => console.log('successfully connected'))
 .catch(err => console.log('error: ', err));
 
 
@@ -62,7 +62,6 @@ const insertFeature = async (productid, header, description, type) => {
     INSERT INTO features (productid, featureid)
     VALUES (${productid}, ${featureid});
     `).catch(err => console.log(err));
-  featureid++;
 }
 
 const insert = async (item) => {
@@ -78,23 +77,27 @@ const insert = async (item) => {
   `);
 
   for (text of banner.text) {
-    await insertFeature(productid, banner.header, text, 'banner');
+    featureid++;
+    insertFeature(productid, banner.header, text, 'banner');
   }
 
   for (feature of features) {
-    await insertFeature(productid, feature.header, feature.description, 'feature');
+    featureid++;
+    insertFeature(productid, feature.header, feature.description, 'feature');
   }
 
   for (desc of featureSetup.description) {
-    await insertFeature(productid, featureSetup.header, desc, 'setup');
+    featureid++;
+    insertFeature(productid, featureSetup.header, desc, 'setup');
   }
 
-  await insertFeature(productid, additionals.header, additionals.description, 'additional');
+  featureid++;
+  insertFeature(productid, additionals.header, additionals.description, 'additional');
   for (feature of additionals.contentGrid) {
-    await insertFeature(productid, feature.title, feature.description, 'additionalfeature');
+    featureid++;
+    insertFeature(productid, feature.title, feature.description, 'additionalfeature');
   }
 
-  recordid++;
 }
 
 let seeder = async (records) => {
@@ -106,6 +109,10 @@ let seeder = async (records) => {
     }
     catch(err) { console.log(err) }
   }
+  client.query(`SELECT * FROM records;`)
+  .then(records => console.log('Got : ', records.rows.length))
+  .catch(err => console.log(err))
+
   getter(1005)
   .then(record => console.log('Got : ', record.rows))
   .catch(err => console.log(err))
@@ -122,7 +129,6 @@ let getter = async (productid) => {
   return result;
 }
 
-seeder(fakeDataGenerator(10, 1000));
 
 module.exports.seeder = seeder;
 module.exports.getter = getter;
