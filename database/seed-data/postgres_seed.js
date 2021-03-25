@@ -1,5 +1,7 @@
 const { Pool } = require('pg');
-const { fakeDataGenerator } = require('./fakeDataGenerator.js');
+// const { fakeDataGenerator } = require('./fakeDataGenerator.js');
+const { generator } = require('./csvGenerator');
+const { csvreader } = require('./streamreader')
 
 let recordid = 10000000;
 let featureid = 0;
@@ -15,7 +17,6 @@ const client = new Pool({
 client.connect()
 .then(log => console.log('successfully connected'))
 .catch(err => console.log('error: ', err));
-
 
 const initializer = async () => {
   const makeRecords = `
@@ -102,6 +103,8 @@ const insert = async (item) => {
 
 let seeder = async (records) => {
   await initializer();
+  let headers = records.shift();
+
   for (record of records) {
     try {
       await insert(record, recordid++)
@@ -129,6 +132,12 @@ let getter = async (productid) => {
   return result;
 }
 
+(async () => {
+  await generator(10);
+  let records = await csvreader('database/seed-data/csvData/data.csv');
+  console.log(records)
+  seeder(records);
+})();
 
 module.exports.seeder = seeder;
 module.exports.getter = getter;

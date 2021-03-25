@@ -4,15 +4,15 @@ const util = require('util');
 let datapath = 'database/seed-data/csvData/data.csv';
 
 let disassembler = files => {
-  let result = {};
+  let result = [];
   let data = files.split('\n');
   let headers = data.shift().split(',');
-  result.headers = headers;
+  result.push(headers);
   for (let i = 0; i < data.length-1; i++) {
     let record = data[i];
     record = record.split(',');
     record = record.slice(1, record.length-1);
-    result[i] = record;
+    result.push(record);
   }
   return result;
 }
@@ -25,8 +25,8 @@ let reader = async (file) => {
   });
 }
 
-let readData = async (filepath) => await reader(filepath);
+let csvreader = async (filepath) => await reader(filepath);
 
-modules.export.readData = readData;
+module.exports.csvreader = csvreader;
 
 // (async () => console.log(await readData(datapath)))();
