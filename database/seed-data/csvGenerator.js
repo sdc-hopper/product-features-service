@@ -46,14 +46,58 @@ const row = () => {
 }
 
 const generator = (count) => {
-  let records = [];
-  records = records.concat(headers())
-  records.push('\n');
-  for (let i = 0; i < count; i++) {
-    records = records.concat(row());
+  let currfile = 0;
+  while (count > 0) {
+    console.log('records remaining: ', count);
+    let records = [];
+    records = records.concat(headers())
     records.push('\n');
+    for (let i = 0; i < (count < 2500 ? count : 2500); i++) {
+      records = records.concat(row());
+      records.push('\n');
+    }
+    console.log('generated records: ', records.length)
+    fs.writeFile(`database/seed-data/csvData/data${currfile++}.csv`, records, () => console.log('done'));
+    count -= 2500;
   }
-  fs.writeFile('database/seed-data/csvData/data.csv', records, () => console.log('done'));
 }
+
+let header = () => ['productid, header, description, type'];
+
+let featureString = (productid, type) => `${productid}, ${fakeHeader()}, ${fakeDescription()}, ${type}`;
+
+let addFeatureString = (productid, type) => `${productid}, ${fakeTitle()}, ${fakeDescription()}, ${type}`;
+
+let generate = (count, startingid) => {
+  let records = header();
+  let productid = 1000 + startingid;
+  for (let i = 0; i < count; i++) {
+    for (let j = 0; j < 7; j++) {
+      records.push(featureString(productid, 'feature'));
+    }
+    for (let j = 0; j < 3; j++) {
+      records.push(featureString(productid, 'setup'));
+    }
+    for (let j = 0; j < 2; j++) {
+      records.push(featureString(productid, 'banner'));
+    }
+    records.push(featureString(productid, 'addtional'));
+    for (let j = 0; j < 5; j++) {
+      records.push(addFeatureString(productid, 'addfeature'))
+    }
+    productid++;
+  }
+  return records;
+}
+
+let writer = async (batches) => {
+  for (let curr = 0; curr < batches; curr++) {
+    let data = generate(25000, curr * 25000).join('\n');
+    fs.writeFileSync(`/Users/Shared/sdcdata/data${curr}.csv`, data);
+    console.log('Done with batch ', curr);
+  }
+}
+
+writer(40)
 
 module.exports.generator = generator;

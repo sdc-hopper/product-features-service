@@ -1,9 +1,6 @@
 const { Pool } = require('pg');
-// const { fakeDataGenerator } = require('./fakeDataGenerator.js');
-const { generator } = require('./csvGenerator');
 const { csvreader, slowreader } = require('./streamreader')
 
-let recordid = 10000000;
 let featureid = 0;
 
 const client = new Pool({
@@ -66,32 +63,7 @@ const insertFeature = async (productid, header, description, type) => {
     `).catch(err => console.log(err));
 }
 
-const insertRecordObject = async (item) => {
-  let productid = item.productId;
-  let banner = item.banner;
-  let features = item.features;
-  let featureSetup = item.featureSetup
-  let additionals = item.additionalFeatures;
-  await client.query(`
-  INSERT INTO records (recordid, productid)
-  VALUES (${recordid}, ${productid});
-  `);
-  for (text of banner.text) {
-    insertFeature(productid, banner.header, text, 'banner');
-  }
-  for (feature of features) {
-    insertFeature(productid, feature.header, feature.description, 'feature');
-  }
-  for (desc of featureSetup.description) {
-    insertFeature(productid, featureSetup.header, desc, 'setup');
-  }
-  insertFeature(productid, additionals.header, additionals.description, 'additional');
-  for (feature of additionals.contentGrid) {
-    insertFeature(productid, feature.title, feature.description, 'additionalfeature');
-  }
-}
-
-let insert = async (data) => {
+let insert = async (data, recordid) => {
   let productid = parseInt(data[0]);
 
   await client.query(`
@@ -122,29 +94,22 @@ let insert = async (data) => {
   insertFeature(productid, data[28], data[29], 'addfeature');
   insertFeature(productid, data[30], data[31], 'addfeature');
   insertFeature(productid, data[32], data[33], 'addfeature');
-
-  recordid++;
 }
 
-let seeder = async (records) => {
-  await initializer();
+let seeder = async (records, recordid) => {
   let headers = records.shift();
 
   for (record of records) {
     try {
-      await insert(record);
-      if (recordid % 100 === 0) { console.log('Finished record: ', recordid) }
+      await insert(record, recordid);
+      recordid++;
+      if (recordid % 1000 === 0) { console.log('Finished record: ', recordid) }
     }
     catch(err) { console.log(err) }
   }
   client.query(`SELECT * FROM records;`)
   .then(records => console.log('Got records: ', records.rows.length))
   .catch(err => console.log(err))
-
-  getter(1005)
-  .then(record => console.log('Got item: ', record.rows.length))
-  .catch(err => console.log(err))
-  .finally(() => client.end());
 }
 
 let getter = async (productid) => {
@@ -158,15 +123,30 @@ let getter = async (productid) => {
 }
 
 let testseed = async () => {
-  let path = 'database/seed-data/csvData/data.csv';
-  // let data = await csvreader(path);
-  let data = await slowreader(path);
-  console.log('Got ', data.length, ' records.')
+  let recordid = 10000000;
 
-  seeder(data);
+  await initializer();
+
+  await (async () => {
+    for (let i = 0; i < 40; i++) {
+      let path = `database/seed-data/csvData/data${i}.csv`;
+      recordid += 2500;
+      let data = await slowreader(path);
+      console.log('Got ', data.length, ' records.')
+      await seeder(data, recordid);
+    }
+  })();
+
+  client.query(`SELECT * FROM records;`)
+  .then(records => console.log('Got records: ', records.rows.length))
+  .catch(err => console.log(err))
+
+  getter(1005)
+  .then(record => console.log('Got item: ', record.rows.length))
+  .catch(err => console.log(err))
+  .finally(() => client.end())
 }
 
-testseed();
 
 module.exports.seeder = seeder;
 module.exports.getter = getter;
