@@ -15,11 +15,10 @@ client.connect()
 const startup = async () => {
   await client.query(`
     DROP TABLE IF EXISTS features;
-    DROP TABLE IF EXISTS featurecontent;
-    DROP TABLE IF EXISTS records;
   `);
   await client.query(`
     CREATE TABLE features (
+    recordid integer PRIMARY KEY,
     productid integer,
     header varchar(127),
     description varchar(511),
@@ -29,8 +28,7 @@ const startup = async () => {
   console.log('Setup completed');
 }
 
-let adder = async () => {
-  let filecount = 40;
+let adder = async (filecount) => {
   for (let i = 0; i < filecount; i++) {
     await client.query(`
       COPY features
@@ -44,10 +42,20 @@ let adder = async () => {
   .catch(err => console.log(err))
 }
 
-let seed = async () => {
+let seed = async (filecount) => {
   await startup();
-  await adder();
+  await adder(filecount);
   console.log('All done!');
+  await bigtester();
 }
 
-seed();
+// seed(2);
+
+let bigtester = async () => {
+  console.log('POWERING Up')
+  console.time();
+  let data = await client.query('EXPLAIN ANALYZE SELECT * FROM features WHERE productid = 10000;');
+  console.timeEnd();
+  console.log(data.rows);
+
+};
