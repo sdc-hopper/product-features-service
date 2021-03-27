@@ -24,6 +24,8 @@ const startup = async () => {
     description varchar(511),
     type varchar(31)
     );
+    CREATE INDEX product_id ON features(productid);
+    CREATE INDEX type ON features(type);
   `);
   console.log('Setup completed');
 }
@@ -49,13 +51,13 @@ let seed = async (filecount) => {
   await bigtester();
 }
 
-// seed(2);
-
 let bigtester = async () => {
-  console.log('POWERING Up')
-  console.time();
-  let data = await client.query('EXPLAIN ANALYZE SELECT * FROM features WHERE productid = 10000;');
-  console.timeEnd();
+  console.log('POWERING UP')
+  let data = await client.query(`EXPLAIN ANALYZE SELECT * FROM features WHERE productid = 2000000;`);
+  let result = await client.query(`SELECT * FROM features WHERE productid = 2000000;`);
   console.log(data.rows);
-
+  console.log(result.rows);
 };
+
+// Insert 2 million records from csv files
+seed(80);
