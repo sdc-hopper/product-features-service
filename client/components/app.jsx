@@ -57,18 +57,18 @@ class ProductFeatures extends Component {
   }
 
   getProductPhotos(productId) {
-    return axios.get(`http://localhost:4002/photos/features/${productId}`)
+    return dummyImages;
   }
 
   fetchData(productId) {
     Promise.all([
       this.getProductFeatures(productId),
-      //this.getProductPhotos(productId)
+      this.getProductPhotos(productId)
     ])
     .then((res) => {
       this.setState({
         productFeatures: res[0].data,
-        productPhotos: [] //res[1].data.featuresUrls
+        productPhotos: res[1] //res[1].data.featuresUrls
       })
     })
     .catch((err) => {
@@ -82,10 +82,11 @@ class ProductFeatures extends Component {
   componentDidMount() {
     const productId = window.location.pathname.split('/')[1] || 1000;
     this.fetchData(productId);
+    console.log(this.state.productFeatures);
   }
 
   render() {
-    const text = this.state.productFeatures[0];
+    const text = this.state.productFeatures;
     const img = this.state.productPhotos;
 
     return (
