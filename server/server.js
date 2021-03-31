@@ -3,8 +3,7 @@ const app = express();
 const port = 4000;
 const path = require('path');
 const cors = require('cors');
-const mongoose = require('mongoose');
-const db = require('../database/database.js');
+const pgdb = require('../database/postgresdb.js')
 
 app.use(cors());
 app.use('/', express.static(path.join(__dirname + '/../public')));
@@ -17,12 +16,10 @@ const corsOptions = {
 
 app.get('/product-features/:id', (req, res) => {
   const productId = req.params.id;
-  db.load(productId, (err, data) => {
-    if (err) {
-      res.sendStatus(404);
-    }
-    res.json(data);
-  });
+  console.log('Serving request for product: ', productId);
+  pgdb.load(productId)
+  .then(record => res.json(record))
+  .catch(err => res.sendStatus(404));
 });
 
 const server = app.listen(port, () => {
