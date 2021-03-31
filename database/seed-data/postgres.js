@@ -38,7 +38,7 @@ let load = async (client, productid) => {
 }
 
 let analyze = async(client, productid) => {
-  return await client.query(`EXPLAIN ANALYZE SELECT * FROM features WHERE productid = 2000000;`);
+  return await client.query(`EXPLAIN ANALYZE SELECT * FROM features WHERE productid = ${productid};`);
 }
 
 module.exports.load = load;

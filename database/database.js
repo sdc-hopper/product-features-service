@@ -1,62 +1,64 @@
-const { Pool } = require('pg');
-const db = require('./seed-data/postgres.js');
+const mongoose = require('mongoose');
 
-const client = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'postgres',
-  password: 'password',
-  port: 5432,
+// open mongoose connection
+mongoose.connect('mongodb://localhost/fec_product_features', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
 });
 
-client.connect()
-.then(() => console.log('Client successfully connected'))
-.catch(err => console.log('Client error: ', err));
+mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
-const seed = async (recordcount) => {
-  db.startup(client)
-  .then(() => {
-    db.seed(client, recordcount)
-    .then(() => console.log('Successfully seeded'))
-  })
-  .catch(err => console.log('Seeder error: ', err));
-}
-
-const load = async (productid) => {
-  let records = await db.load(client, productid);
-  return build(records.rows);
-}
-
-const build = (record) => {
-  let result = {
-    banner: { text: [] },
-    features: [],
-    featureSetup: { description: [] },
-    additionalFeatures: { contentGrid: [] }
-  };
-  for (row of record) {
-    if (row.type === 'banner') {
-      result.banner.header = result.banner.header ? result.banner.header : row.header;
-      result.banner.text.push(row.description);
-    }
-    else if (row.type === 'feature') {
-      let feature = { header: row.header, description: row.description };
-      result.features.push(feature);
-    }
-    else if (row.type === 'setup') {
-      result.featureSetup.header = result.featureSetup.header ? result.featureSetup.header : row.header;
-      result.featureSetup.description.push(row.description);
-    }
-    else if (row.type === 'additional') {
-      result.additionalFeatures.header = row.header;
-      result.additionalFeatures.description = row.description;
-    }
-    else if (row.type === 'addfeature') {
-      let feature = { title: row.header, description: row.description }
-      result.additionalFeatures.contentGrid.push(feature);
-    }
+const productFeaturesSchema = new mongoose.Schema({
+  productId: {
+    type: Number,
+    unique: true
+  },
+  banner: {
+    header: String,
+    text: [{type: String}]
+  },
+  features: [{
+    header: String,
+    description: String
+  }],
+  featureSetup: {
+    header: String,
+    description: [{type: String}]
+  },
+  additionalFeatures: {
+    header: String,
+    description: String,
+    contentGrid: [{
+      title: String,
+      description: String
+    }]
   }
-  return result;
+});
+
+const ProductFeatures = mongoose.model('ProductFeatures', productFeaturesSchema);
+
+const load = (productId, callback) => {
+  ProductFeatures.find({ productId: productId })
+    .exec((err, data) => {
+      // if error, return error
+      if (err) {
+        console.log(`Error loading product ${productId} from database`, err);
+        callback(err);
+      }
+      // else if product does not exist, create and send error
+      // db.collections.find() does not return error when no query match
+      else if (data[0] === undefined || !data[0].productId) {
+        console.log(`Error: product ${productId} does not exist`);
+        callback(new Error('Product not found!'));
+      }
+      // else document record at productId exists, so send data
+      else {
+        callback(null, data);
+      }
+    });
 }
 
+module.exports = ProductFeatures;
 module.exports.load = load;
