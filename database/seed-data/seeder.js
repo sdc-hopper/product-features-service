@@ -41,7 +41,6 @@ async function seedDatabase(numRecordsToCreate, startingRecordID=1000, batchSize
     for (let batch = 0; batch < numRecordsToCreate; batch += batchSize) {
       await (async (id) => {
         let fakeData = await fakeDataGenerator(batchSize, recordId + id);
-        // let fakeData = fakeDataGeneratorTwo(batchSize, recordId + id)
         await seedDatabaseMany(fakeData, recordId + id);
         if (id % 10000 === 0) { console.log('At record: ', id)}
       })(batch);
@@ -62,10 +61,5 @@ async function seedDatabase(numRecordsToCreate, startingRecordID=1000, batchSize
     mongoose.connection.close();
   }
 }
-
-
-(async () => {
-  await seedDatabase(1000000, 1000, 1000);
-})()
 
 module.exports.seedDatabase = seedDatabase;
