@@ -1,0 +1,17 @@
+config:
+  target: "http://localhost:4000"
+  phases:
+    - duration: 10
+      arrivalRate: 100
+      name: 100 RPS get calls
+  payload:
+    path: "testvals.csv"
+    fields:
+      - "id"
+    order: sequence
+    skipHeader: true
+scenarios:
+  - name: "Get product features for 1000 ids"
+    flow:
+      - get:
+          url: "/product-features/{{ id }}"

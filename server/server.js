@@ -1,9 +1,11 @@
+const newrelic = require('newrelic');
 const express = require('express');
 const app = express();
 const port = 4000;
 const path = require('path');
 const cors = require('cors');
 const pgdb = require('../database/postgresdb.js')
+
 
 app.use(cors());
 app.use('/', express.static(path.join(__dirname + '/../public')));
@@ -18,7 +20,7 @@ app.get('/product-features/:id', (req, res) => {
   const productId = req.params.id;
   console.log('Serving request for product: ', productId);
   pgdb.load(productId)
-  .then(record => res.json(record))
+  .then(record => res.status(200).json(record))
   .catch(err => res.sendStatus(404));
 });
 
