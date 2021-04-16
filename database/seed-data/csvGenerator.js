@@ -52,7 +52,4 @@ let writer = async (batches) => {
   }
 }
 
-// Seeds 2 million records
-writer(80)
-
-module.exports.generator = generator;
+module.exports.generate = generate;
