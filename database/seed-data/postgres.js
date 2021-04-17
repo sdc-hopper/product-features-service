@@ -33,6 +33,14 @@ let seed = async (client, filecount) => {
   .catch(err => console.log(err))
 }
 
+let seedfile = async (client, path) => {
+  await client.query(`
+    COPY features
+    FROM '${path}' WITH DELIMITER ',' CSV HEADER;
+  `);
+  console.log('File added');
+}
+
 let load = async (client, productid) => {
   return await client.query(`SELECT * FROM features WHERE productid = ${productid};`);
 }
@@ -45,3 +53,4 @@ module.exports.load = load;
 module.exports.analyze = analyze;
 module.exports.seed = seed;
 module.exports.startup = startup;
+module.exports.seedfile = seedfile;

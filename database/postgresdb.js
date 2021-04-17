@@ -1,5 +1,7 @@
 const { Pool } = require('pg');
 const db = require('./seed-data/postgres.js');
+const { generate } = require('./seed-data/csvGenerator.js');
+const fs = require('fs');
 
 const client = new Pool({
   user: 'postgres',
@@ -14,17 +16,27 @@ client.connect()
 .catch(err => console.log('Client error: ', err));
 
 const seed = async (recordcount) => {
-  db.startup(client)
-  .then(() => {
-    db.seed(client, recordcount)
-    .then(() => console.log('Successfully seeded'))
-  })
-  .catch(err => console.log('Seeder error: ', err));
+  await db.startup(client);
+  let batchsize = recordcount / 10*1000;
+  let path = '/Users/Shared/sdcdata/datafile.csv'
+  for (let batch = 0; batch < batchsize; batch++) {
+    const records = generate(10*1000, 10*1000*batch, 180*1000*batch)
+    fs.writeFileSync(path, records)
+    await db.seedfile(client, path)
+    console.log(`Seeded batch ${batch}`)
+  }
+  console.log('Done');
 }
 
 const load = async (productid) => {
   let records = await db.load(client, productid);
   return build(records.rows);
+}
+
+const loadfile = async (file) => {
+  db.seedfile(client, file)
+  .then(() => console.log('Successfully seeded'))
+  .catch(err => console.log('Seeder err: ', err));
 }
 
 const build = (record) => {
@@ -59,4 +71,7 @@ const build = (record) => {
   return result;
 }
 
+(async () => await seed(10))()
+
 module.exports.load = load;
+module.exports.loadfile = loadfile

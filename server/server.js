@@ -6,7 +6,6 @@ const path = require('path');
 const cors = require('cors');
 const pgdb = require('../database/postgresdb.js')
 
-
 app.use(cors());
 app.use('/', express.static(path.join(__dirname + '/../public')));
 app.use('/:id', express.static(path.join(__dirname + '/../public')));
@@ -20,6 +19,13 @@ app.get('/product-features/:id', (req, res) => {
   const productId = req.params.id;
   console.log('Serving request for product: ', productId);
   pgdb.load(productId)
+  .then(record => res.status(200).json(record))
+  .catch(err => res.sendStatus(404));
+});
+
+app.post('/product-features/', (req, res) => {
+  const file = req.data;
+  pdgb.loadfile(file)
   .then(record => res.status(200).json(record))
   .catch(err => res.sendStatus(404));
 });
