@@ -2,20 +2,13 @@
 
 > System Design Capstone (SDC) Project
 
-Microservice for product features for a given product built around SOA e-commerce application. Each individual feature, identified by a given product id, has fearures including a product banner, a list of features, setup features, and additional features beyond the basic level. Database is set up in PostgreSQL, including seeding script for generating dummy records to database. Server is run off Express.js, and front end is based off legacy code developed in React. 
+Microservice for product features for a given product built around SOA e-commerce application. Each individual feature, identified by a given product id, has fearures including a product banner, a list of features, setup features, and additional features beyond the basic level. Database is set up in PostgreSQL, including seeding script for generating dummy records to database. Server is run off Express.js, and front end is based off legacy code developed in React.
 
 ## Related Projects
 
   - https://github.com/sdc-hopper/
 
-## Table of Contents
-
-1. [Development](#development)
-2. [CRUD_API]
-
-## Development
-
-### Installing Dependencies
+### Getting Started
 
 From within the root directory:
 
@@ -23,6 +16,24 @@ From within the root directory:
 npm install -g webpack
 npm install
 ```
+
+To build front end bundle file:
+```sh
+npm run build
+```
+
+To seed database with 1 million fake records:
+```sh
+npm run seed
+```
+
+To run app in production mode:
+```sh
+npm run start
+```
+
+To see app running, go to http://localhost:4000
+
 
 ## CRUD Api Calls
 
