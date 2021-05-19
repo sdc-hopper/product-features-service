@@ -71,7 +71,6 @@ const build = (record) => {
   return result;
 }
 
-(async () => await seed(10))()
-
 module.exports.load = load;
 module.exports.loadfile = loadfile
+module.exports.seed = seed
