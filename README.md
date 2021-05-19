@@ -2,6 +2,8 @@
 
 > System Design Capstone (SDC) Project
 
+Microservice for product features for a given product built around SOA e-commerce application. Each individual feature, identified by a given product id, has fearures including a product banner, a list of features, setup features, and additional features beyond the basic level. Database is set up in PostgreSQL, including seeding script for generating dummy records to database. Server is run off Express.js, and front end is based off legacy code developed in React. 
+
 ## Related Projects
 
   - https://github.com/sdc-hopper/
